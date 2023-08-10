@@ -21,6 +21,6 @@ function combinations(n, r)
   }
 }
 
-function getMaxGroupPossibilities(num) {
-  combinations(num, 2)
+function getMaxGroupCombinations(num) {
+  return combinations(num, 2)
 }

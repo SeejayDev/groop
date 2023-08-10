@@ -56,20 +56,25 @@ function clearPlayerList() {
 // function to display the players
 function displayPlayerList() {
   var playerList = fetchPlayerList()
-  
+  var playerListDiv = document.getElementById("container-players")
+
   var html = ""
-  for (let i = 0; i < playerList.length; i++) {
-    var playerName = playerList[i]
-    html += `
-      <div class="py-1 flex items-center justify-between">
-        <p class="uppercase font-bold text-lg">${playerName}</p>
-        <button class="text-red-600 w-8 h-8" onclick="removeFromPlayerList(${i})">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full rotate-45" viewBox="0 0 24 24"><path fill="currentColor" d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"/></svg>
-        </button>
-      </div>
-    `
+  if (playerList.length > 0) {
+    playerListDiv.classList.remove("hidden")
+    for (let i = 0; i < playerList.length; i++) {
+      var playerName = playerList[i]
+      html += `
+        <div class="py-1 flex items-center justify-between">
+          <p class="uppercase font-bold text-lg">${playerName}</p>
+          <button class="text-red-600 w-8 h-8" onclick="removeFromPlayerList(${i})">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full rotate-45" viewBox="0 0 24 24"><path fill="currentColor" d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"/></svg>
+          </button>
+        </div>
+      `
+    }
+  } else {
+    playerListDiv.classList.add("hidden")
   }
 
-  var playerListDiv = document.getElementById("container-players")
   playerListDiv.innerHTML = html
 }
