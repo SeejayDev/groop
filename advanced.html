@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Scripts for interacting with the playerList and previousGroupList localStorage item -->
+  <script type="text/javascript" src="./js/playerListFunctions.js"></script>
+  <script type="text/javascript" src="./js/previousGroupListFunctions.js"></script>
+  <script type="text/javascript" src="./js/functions.js"></script>
+
+  <script>
+    // function to get new player name
+    function addName() {
+      var newNameInput = document.getElementById("input-player-name")
+      var newName = newNameInput.value
+
+      if (newName && newName.trim() !== "") {
+        addToPlayerList(newName)
+        newNameInput.value = ""
+      }
+    }
+
+    // function to generate the groups
+    function doGrouping() {
+      // create the array
+      var numberPerGroup = 2
+      var arrayOfPlayers = fetchPlayerList()
+      shuffle(arrayOfPlayers)
+
+      if (numberPerGroup > arrayOfPlayers.length) {
+        alert(`Too few names added`)
+        return
+      }
+
+      // generate the groups
+      var arrayOfGroups = []
+      var remainingPeople = arrayOfPlayers.length
+      var index = 0
+      while (remainingPeople >= numberPerGroup) {
+        var newGroup = []
+        for (let i = 0; i < numberPerGroup; i++) {
+          newGroup.push(arrayOfPlayers[index])
+          remainingPeople--
+          index++
+        }
+
+        newGroup.sort()
+        arrayOfGroups.push(newGroup)
+      }
+
+      // check if any of the generated groups are duplicated
+      var previousGroups = fetchPreviousGroupList()
+      var duplicateExists = false
+      for (let i = 0; i < arrayOfGroups.length; i++) {
+        let newGroup = arrayOfGroups[i]
+        
+        let newGroupString = JSON.stringify(newGroup)
+        let prevGroupsString = JSON.stringify(previousGroups)
+        duplicateExists = prevGroupsString.includes(newGroupString)
+        console.log(duplicateExists)
+      }
+
+      if (duplicateExists) {
+        //TODO: ADD DUPLICATION CHECK, USE COMBINATIONS TO SEE IF ANY POSSIBLE MATCHES LEFT
+      } else {
+        // add current groups to list
+        addToPreviousGroupList(arrayOfGroups)
+      }
+
+      var arrayOfExtras = []
+      for (let i = 0; i < remainingPeople; i++) {
+        indexFromBack = arrayOfPlayers.length - 1 - i
+        arrayOfExtras.push(arrayOfPlayers[indexFromBack])
+      }
+
+      var groupsDiv = document.getElementById("container-groups")
+      var groupsHTML = ""
+      for (let i = 0; i < arrayOfGroups.length; i++) {
+        groupsHTML += `
+          <div class="p-3 items-center justify-between font-medium shadow-lg uppercase text-white bg-purple-600 rounded-md relative overflow-hidden">
+            <p>${arrayOfGroups[i][0]}</p>
+            <p>${arrayOfGroups[i][1]}</p>
+
+            <div class="rounded-full border-8 border-white absolute w-20 h-20 -right-1 top-1 flex items-center justify-center opacity-70 rotate-12">
+              <p class="font-bold text-2xl">${i+1}</p>
+            </div>
+          </div>
+        `
+      }
+      groupsDiv.innerHTML = groupsHTML
+
+      var extrasDiv = document.getElementById("container-extras")
+      var extrasHTML = ""
+      for (let i = 0; i < arrayOfExtras.length; i++) {
+        extrasHTML += `<p class="font-bold text-purple-600 uppercase">${arrayOfExtras[i]}</p>`
+      }
+      extrasDiv.innerHTML = extrasHTML
+    }
+
+    // On page load, check if there is an existing player list
+    // as well as the previous groups list
+    document.addEventListener("DOMContentLoaded", () => {
+      displayPlayerList()
+      fetchPreviousGroupList()
+    })
+  </script>
+</head>
+
+<body>
+  <div class="px-2 w-full mx-auto max-w-xs mt-8">
+    <a href="./" >
+      <p class="font-bold text-6xl text-purple-600 text-center">GROOP</p>
+      <p class="text-center text-sm font-bold italic text-purple-600 mb-8">A grouping app for badminton</p>
+    </a>
+
+    <p class="uppercase font-bold text-2xl mt-4">List of players</p>
+    <div class="mt-2 text-purple-600" id="container-players"></div>
+
+    <div class="flex mt-4 items-center w-full space-x-2">
+      <input required type="text" class="border-2 rounded-md px-2 text-center flex-1 h-10" placeholder="Player Name" id="input-player-name" />
+      <button class="cursor-pointer border-2 border-green-700 rounded-md p-2 text-green-600 h-10 aspect-square" onclick="addName()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"/></svg>
+      </button>
+    </div>
+
+    <button class="border-2 w-full cursor-pointer border-purple-600 rounded-md mt-4 py-2 font-bold text-purple-600" onclick="doGrouping()">
+      GROOP
+    </button>
+
+    <div class="mt-8">
+      <p class="font-bold text-xl">EXTRAS:</p>
+
+      <div class="space-y-3 " id="container-extras">-</div>
+    </div>
+
+    <div class="mt-4">
+      <p class="font-bold text-xl">GROUPS:</p>
+
+      <div class="mt-2 space-y-3" id="container-groups">-</div>
+    </div>
+  </div>
+</body>
