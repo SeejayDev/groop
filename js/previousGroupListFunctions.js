@@ -22,3 +22,8 @@ function addToPreviousGroupList(groupList) {
   var newList = currentList.concat(groupList)
   localStorage.setItem(PREVIOUS_GROUPS_LIST, JSON.stringify(newList))
 }
+
+
+function clearPreviousGroupList() {
+  localStorage.removeItem(PREVIOUS_GROUPS_LIST)
+}

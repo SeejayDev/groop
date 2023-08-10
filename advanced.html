@@ -13,6 +13,7 @@
   <script type="text/javascript" src="./js/previousGroupListFunctions.js"></script>
   <script type="text/javascript" src="./js/combinationFunctions.js"></script>
   <script type="text/javascript" src="./js/functions.js"></script>
+  <script type="text/javascript" src="./js/groupingFunctions.js"></script>
 
   <script>
     // function to get new player name
@@ -26,37 +27,13 @@
       }
     }
 
-    function generateGroups(arrayOfPlayers, numberPerGroup) {
-      shuffle(arrayOfPlayers)
+    function doClearHistory() {
+      var confirmAction = confirm("Are you sure you want to clear all grouping history?")
 
-      if (numberPerGroup > arrayOfPlayers.length) {
-        alert(`Too few names added`)
-        return
+      if (confirmAction) {
+        clearPreviousGroupList()
+        localStorage.removeItem("extraPlayer")
       }
-
-      // generate the groups
-      var arrayOfGroups = []
-      var remainingPeople = arrayOfPlayers.length
-      var index = 0
-      while (remainingPeople >= numberPerGroup) {
-        var newGroup = []
-        for (let i = 0; i < numberPerGroup; i++) {
-          newGroup.push(arrayOfPlayers[index])
-          remainingPeople--
-          index++
-        }
-
-        newGroup.sort()
-        arrayOfGroups.push(newGroup)
-      }
-
-      var arrayOfExtras = []
-      for (let i = 0; i < remainingPeople; i++) {
-        indexFromBack = arrayOfPlayers.length - 1 - i
-        arrayOfExtras.push(arrayOfPlayers[indexFromBack])
-      }
-
-      return { arrayOfGroups, arrayOfExtras }
     }
 
     // function to generate the groups
@@ -87,18 +64,31 @@
           }
         }
 
+        // check if the extra player is repeated
+        var consecutiveExtra = false
+        if (arrayOfExtras.length > 0) {
+          consecutiveExtra = arrayOfExtras[0] === localStorage.getItem("extraPlayer")
+        }
+
         if (duplicateExists) {
           // if there is duplicate, check if combinations are still possible
           var numOfGroupsNeeded = arrayOfGroups.length
           var numOfGroupsGenerated = previousGroups.length
           noMoreCombinations = (maxCombinations - numOfGroupsGenerated) < numOfGroupsNeeded
         } else {
-          // if no duplicates, add groups to list and render content
-          addToPreviousGroupList(arrayOfGroups)
-
-          groups = arrayOfGroups
-          extras = arrayOfExtras
-          renderContent(groups, extras)
+          if (!consecutiveExtra) {
+            // if no duplicates, add groups to list and render content
+            addToPreviousGroupList(arrayOfGroups)
+  
+            groups = arrayOfGroups
+            extras = arrayOfExtras
+            renderContent(groups, extras)
+  
+            // set previousExtra flag
+            if (arrayOfExtras.length > 0) {
+              localStorage.setItem("extraPlayer", arrayOfExtras[0])
+            }
+          }
         }
       }
 
@@ -171,13 +161,16 @@
       <p class="text-center text-sm font-bold italic text-purple-600 mb-8">A grouping app for badminton</p>
     </a>
 
-    <p class="uppercase font-bold text-2xl mt-4">List of players</p>
+    <div class="flex items-center justify-between mt-4">
+      <p class="uppercase font-bold text-2xl">List of players</p>
+      <div class="text-xl font-bold bg-purple-600 px-3 py-1 text-white rounded-md flex items-center justify-center" id="player-count">0</div>
+    </div>
     <div class="mt-2 text-purple-600 max-h-64 w-full hidden overflow-x-hidden overflow-y-auto px-4 py-1 shadow-lg border border-purple-600 rounded-lg" id="container-players">
     </div>
 
     <div class="flex mt-4 items-center w-full space-x-2">
       <input required type="text" class="border-2 rounded-md px-2 text-center flex-1 h-10" placeholder="Player Name" id="input-player-name" />
-      <button class="cursor-pointer border-2 border-green-700 rounded-md p-2 text-green-600 h-10 aspect-square" onclick="addName()" id="btn-submit">
+      <button class="cursor-pointer border-2 border-green-700 rounded-md p-2 text-green-600 w-10 aspect-square" onclick="addName()" id="btn-submit">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-full h-full" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"/></svg>
       </button>
     </div>
@@ -187,17 +180,22 @@
     </button>
 
     <div class="mt-8">
-      <p class="font-bold text-xl">EXTRAS:</p>
+      <div class="flex items-center justify-between">
+        <p class="font-bold text-xl">EXTRAS:</p>
+      </div>
 
-      <div class="space-y-3 " id="container-extras">-</div>
+      <div class="space-y-3" id="container-extras">-</div>
     </div>
 
     <div class="mt-4">
-      <p class="font-bold text-xl">GROUPS:</p>
+      <div class="flex items-center justify-between">
+        <p class="font-bold text-xl">GROUPS:</p>
 
-      <div class="mt-2 relative" id="container-groups">
--
+        <div>
+          <button class="border-purple-600 text-purple-600 border-2 rounded-md px-3 py-1 font-bold text-sm" onclick="doClearHistory()">Clear History</button>
+        </div>
       </div>
+      <div class="mt-2 relative" id="container-groups">-</div>
     </div>
   </div>
 </body>

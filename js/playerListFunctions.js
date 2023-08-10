@@ -57,6 +57,7 @@ function clearPlayerList() {
 function displayPlayerList() {
   var playerList = fetchPlayerList()
   var playerListDiv = document.getElementById("container-players")
+  var playerCountTag = document.getElementById("player-count")
 
   var html = ""
   if (playerList.length > 0) {
@@ -72,8 +73,11 @@ function displayPlayerList() {
         </div>
       `
     }
+
+    playerCountTag.innerText = playerList.length
   } else {
     playerListDiv.classList.add("hidden")
+    playerCountTag.innerText = 0
   }
 
   playerListDiv.innerHTML = html
